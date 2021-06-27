@@ -1,25 +1,47 @@
 #### PART 1 ####
 
-def verify_student_information(id: int, name: str, semester: int, homework_avg: int):
-    # if str(id)[0] == '0' or not name.strip().isalpha() or semester < 1 or homework_avg not in range(51, 101):
-    #     return False
-    #
-    if str(id)[0] == '0' or not name.replace(" ", "").isalpha() or int(semester) < 1 or int(homework_avg) not in range(
-            51, 101):
+
+def verify_student_information(id: str, name: str, semester: int, homework_avg: int):
+    """
+    Verifies student information is valid by designated set of rules
+    """
+    if id[0] == '0' or len(id) != 8 or not name.isalpha() or semester < 1 or homework_avg \
+            not in range(51, 101):
         return False
     return True
 
 
 def calculate_final_grade(id: int, homework_avg: int):
+    """
+    Calculates final grades based on id and homework
+    """
     return (id % 100 + homework_avg) // 2
 
 
-def write_to_output_path(students_dict: dict, output_path: str):
+def write_to_output_path_and_calculate_final_grade(students_dict: dict, output_path: str):
+    """
+    Writes to output file and calculates semester final average
+    """
+    final_grade_list = []
     file_output = open(output_path, "w")
     for student_id in sorted(students_dict):
         (name, semester, homework_avg) = students_dict[student_id]
-        file_output.write(F"{int(student_id)},{int(homework_avg)},{calculate_final_grade(int(student_id), int(homework_avg))}\n")
+        student_final_grade = calculate_final_grade(student_id, homework_avg)
+        file_output.write(F"{student_id}, {homework_avg}, {student_final_grade}\n")
+        final_grade_list.append(student_final_grade)
     file_output.close()
+    if final_grade_list:
+        return sum(final_grade_list) // len(final_grade_list)
+    return 0
+
+
+def unpack_data_field_line(line: str):
+    """
+    Unpacks line and formats it
+    """
+    line_data = line.split(",")
+    (id, name, semester, homework_avg) = line_data
+    return id.replace(" ", ""), name.replace(" ", ""), int(semester), int(homework_avg)
 
 
 # final_grade: Calculates the final grade for each student, and writes the output (while eliminating illegal
@@ -30,12 +52,12 @@ def final_grade(input_path: str, output_path: str) -> int:
     file_input = open(input_path, "r")
     students_dict = {}
     for line in file_input:
-        line_data = line.split(",")
-        (id, name, semester, homework_avg) = line_data
+        id, name, semester, homework_avg = unpack_data_field_line(line)
         if verify_student_information(id, name, semester, homework_avg):
-            students_dict[id] = [name, semester, homework_avg]
-    write_to_output_path(students_dict, output_path)
+            students_dict[int(id)] = [name, semester, homework_avg]
+    finale_grade_average = write_to_output_path_and_calculate_final_grade(students_dict, output_path)
     file_input.close()
+    return finale_grade_average
 
 
 #### PART 2 ####
@@ -56,6 +78,3 @@ def check_strings(s1: str, s2: str) -> bool:
             return False
         s2_dict[char] -= 1
     return True
-
-
-final_grade(r".\input.txt", ".\output.txt")
