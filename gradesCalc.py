@@ -27,7 +27,9 @@ def write_to_output_path_and_calculate_final_grade(students_dict: dict, output_p
     for student_id in sorted(students_dict):
         (name, semester, homework_avg) = students_dict[student_id]
         student_final_grade = calculate_final_grade(student_id, homework_avg)
-        file_output.write(F"{student_id}, {homework_avg}, {student_final_grade}\n")
+        file_output.write("{student_id}, {homework_avg}, {student_final_grade}\n".format(student_id=student_id,
+                                                                              homework_avg=homework_avg,
+                                                                              student_final_grade=student_final_grade))
         final_grade_list.append(student_final_grade)
     file_output.close()
     if final_grade_list:
